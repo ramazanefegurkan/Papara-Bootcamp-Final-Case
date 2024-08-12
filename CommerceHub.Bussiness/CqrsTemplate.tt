@@ -1,0 +1,381 @@
+<#@ template language="C#" debug="true" hostspecific="true" #>
+<#@ output extension=".txt" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="EnvDTE" #>
+<#@ import namespace="Microsoft.VisualStudio.TextTemplating" #>
+
+<# string entity = "Order"; #>
+
+<# string camelCaseEntity = char.ToLowerInvariant(entity[0]) + entity.Substring(1); #>
+
+<# string projectDir = Path.GetDirectoryName(Host.TemplateFile); #>
+
+<#
+string getEntityByIdQueryContent = $@"
+using CommerceHub.Schema;
+using MediatR;
+using AutoMapper;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace CommerceHub.Bussiness.{entity}Features.Query.Get{entity}ById
+{{
+    public record Get{entity}ByIdQuery(int Id) : IRequest<ApiResponse<{entity}Response>>;
+}}
+";
+
+// Get{entity}ByIdQueryHandler.cs dosyasý
+string getEntityByIdQueryHandlerContent = $@"
+using CommerceHub.Schema;
+using MediatR;
+using AutoMapper;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using CommerceHub.Bussiness.Exceptions;
+using CommerceHub.Data.UnitOfWork;
+
+namespace CommerceHub.Bussiness.{entity}Features.Query.Get{entity}ById
+{{
+    public class Get{entity}ByIdQueryHandler : IRequestHandler<Get{entity}ByIdQuery, ApiResponse<{entity}Response>>
+    {{
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
+
+        public Get{entity}ByIdQueryHandler(IUnitOfWork unitOfWork, IMapper mapper)
+        {{
+            _unitOfWork = unitOfWork;
+            _mapper = mapper;
+        }}
+        public async Task<ApiResponse<{entity}Response>> Handle(Get{entity}ByIdQuery query, CancellationToken cancellationToken)
+        {{
+            var {camelCaseEntity} = await _unitOfWork.{entity}Repository.GetById(query.Id);
+            if ({camelCaseEntity} == null)
+            {{
+                throw new NotFoundException(""{entity} not found"");
+            }}
+            var mapped{entity} = _mapper.Map<{entity}Response>({camelCaseEntity});
+            return ApiResponse<{entity}Response>.SuccessResult(mapped{entity});
+        }}
+    }}
+}}
+";
+
+
+// GetAll{entity}sQuery.cs dosyasý
+string getAllEntitiesQueryContent = $@"
+using CommerceHub.Schema;
+using MediatR;
+using AutoMapper;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using CommerceHub.Data.Domain;
+
+namespace CommerceHub.Bussiness.{entity}Features.Query.GetAll{entity}s
+{{
+	public record GetAll{entity}sQuery : IRequest<ApiResponse<IEnumerable<{entity}Response>>>;
+}}
+";
+
+// GetAll{entity}sQueryHandler.cs dosyasý
+string getAllEntitiesQueryHandlerContent = $@"
+using CommerceHub.Schema;
+using MediatR;
+using AutoMapper;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using CommerceHub.Data.UnitOfWork;
+using CommerceHub.Data.Domain;
+
+namespace CommerceHub.Bussiness.{entity}Features.Query.GetAll{entity}s
+{{
+    public class GetAll{entity}sQueryHandler : IRequestHandler<GetAll{entity}sQuery, ApiResponse<IEnumerable<{entity}Response>>>
+    {{
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
+
+        public GetAll{entity}sQueryHandler(IUnitOfWork unitOfWork, IMapper mapper)
+        {{
+            _unitOfWork = unitOfWork;
+            _mapper = mapper;
+        }}
+        public async Task<ApiResponse<IEnumerable<{entity}Response>>> Handle(GetAll{entity}sQuery query,CancellationToken cancellationToken)
+        {{
+            IEnumerable<{entity}> {camelCaseEntity}List = await _unitOfWork.{entity}Repository.GetAll();
+            var mappedList = _mapper.Map<IEnumerable<{entity}Response>>({camelCaseEntity}List);
+            return ApiResponse<IEnumerable<{entity}Response>>.SuccessResult(mappedList);
+        }}
+    }}
+}}
+";
+
+
+// Create{entity}Command.cs dosyasý
+string createEntityCommandContent = $@"
+using CommerceHub.Schema;
+using MediatR;
+using AutoMapper;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace CommerceHub.Bussiness.{entity}Features.Command.Create{entity}
+{{
+    public record Create{entity}Command({entity}Request Request) : IRequest<ApiResponse<int>>;
+}}
+";
+
+// Create{entity}CommandHandler.cs dosyasý
+string createEntityCommandHandlerContent = $@"
+using CommerceHub.Schema;
+using MediatR;
+using AutoMapper;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using CommerceHub.Data.Domain;
+using CommerceHub.Data.UnitOfWork;
+
+namespace CommerceHub.Bussiness.{entity}Features.Command.Create{entity}
+{{
+    public class Create{entity}CommandHandler : IRequestHandler<Create{entity}Command, ApiResponse<int>>
+    {{
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
+
+        public Create{entity}CommandHandler(IUnitOfWork unitOfWork, IMapper mapper)
+        {{
+            _unitOfWork = unitOfWork;
+            _mapper = mapper;
+        }}
+
+        public async Task<ApiResponse<int>> Handle(Create{entity}Command command, CancellationToken cancellationToken)
+        {{
+            var {camelCaseEntity} = _mapper.Map<{entity}Request, {entity}>(command.Request);
+            await _unitOfWork.{entity}Repository.Insert({camelCaseEntity});
+            await _unitOfWork.Complete();
+
+            return ApiResponse<int>.SuccessResult({camelCaseEntity}.Id, ""{entity} created successfully."");
+        }}
+    }}
+}}
+";
+
+// Update{entity}Command.cs dosyasý
+string updateEntityCommandContent = $@"
+using CommerceHub.Schema;
+using MediatR;
+using AutoMapper;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace CommerceHub.Bussiness.{entity}Features.Command.Update{entity}
+{{
+    public record Update{entity}Command(int Id, {entity}Request Request) : IRequest<ApiResponse<bool>>;
+}}
+";
+
+// Update{entity}CommandHandler.cs dosyasý
+string updateEntityCommandHandlerContent = $@"
+using CommerceHub.Schema;
+using MediatR;
+using AutoMapper;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using CommerceHub.Data.UnitOfWork;
+using CommerceHub.Bussiness.Exceptions;
+
+namespace CommerceHub.Bussiness.{entity}Features.Command.Update{entity}
+{{
+    public class Update{entity}CommandHandler : IRequestHandler<Update{entity}Command, ApiResponse<bool>>
+    {{
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
+
+        public Update{entity}CommandHandler(IUnitOfWork unitOfWork, IMapper mapper)
+        {{
+            _unitOfWork = unitOfWork;
+            _mapper = mapper;
+        }}
+
+        public async Task<ApiResponse<bool>> Handle(Update{entity}Command command, CancellationToken cancellationToken)
+        {{
+            var {camelCaseEntity} = await _unitOfWork.{entity}Repository.GetById(command.Id);
+            if ({camelCaseEntity} == null)
+            {{
+                throw new NotFoundException(""{entity} not found"");
+            }}
+            
+            //Update {entity}
+
+            _unitOfWork.{entity}Repository.Update({camelCaseEntity});
+            await _unitOfWork.Complete();
+            return ApiResponse<bool>.SuccessResult(true);
+        }}
+    }}
+}}
+";
+
+// Delete{entity}Command.cs dosyasý
+string deleteEntityCommandContent = $@"
+using CommerceHub.Schema;
+using MediatR;
+using AutoMapper;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace CommerceHub.Bussiness.{entity}Features.Command.Delete{entity}
+{{
+    public record Delete{entity}Command(int Id) : IRequest<ApiResponse<bool>>;
+}}
+";
+
+// Delete{entity}CommandHandler.cs dosyasý
+string deleteEntityCommandHandlerContent = $@"
+using CommerceHub.Schema;
+using MediatR;
+using AutoMapper;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using CommerceHub.Data.UnitOfWork;
+using CommerceHub.Bussiness.Exceptions;
+
+namespace CommerceHub.Bussiness.{entity}Features.Command.Delete{entity}
+{{
+    public class Delete{entity}CommandHandler : IRequestHandler<Delete{entity}Command, ApiResponse<bool>>
+    {{
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
+
+        public Delete{entity}CommandHandler(IUnitOfWork unitOfWork, IMapper mapper)
+        {{
+            _unitOfWork = unitOfWork;
+            _mapper = mapper;
+        }}
+
+        public async Task<ApiResponse<bool>> Handle(Delete{entity}Command command, CancellationToken cancellationToken)
+        {{
+            var {camelCaseEntity} = await _unitOfWork.{entity}Repository.GetById(command.Id);
+            if ({camelCaseEntity} == null)
+            {{
+                throw new NotFoundException(""{entity} not found"");
+            }}
+
+            await _unitOfWork.{entity}Repository.Delete(command.Id);
+            await _unitOfWork.Complete();
+            return ApiResponse<bool>.SuccessResult(true);
+        }}
+    }}
+}}
+";
+
+#>
+
+<#
+// Dosya yollarýný tanýmlama
+string getEntityByIdQueryPath = Path.Combine(projectDir, $"{entity}Features", "Query", $"Get{entity}ById" ,$"Get{entity}ByIdQuery.cs");
+string getEntityByIdQueryHandlerPath = Path.Combine(projectDir, $"{entity}Features",  "Query", $"Get{entity}ById" ,$"Get{entity}ByIdQueryHandler.cs");
+
+string getAllEntitiesQueryPath = Path.Combine(projectDir, $"{entity}Features", "Query", $"GetAll{entity}s" ,$"GetAll{entity}sQuery.cs");
+string getAllEntitiesQueryHandlerPath = Path.Combine(projectDir, $"{entity}Features",  "Query", $"GetAll{entity}s" ,$"GetAll{entity}ssQueryHandler.cs");
+
+string createEntityCommandPath = Path.Combine(projectDir, $"{entity}Features", "Command", $"Create{entity}"  , $"Create{entity}Command.cs");
+string createEntityCommandHandlerPath = Path.Combine(projectDir, $"{entity}Features", "Command", $"Create{entity}", $"Create{entity}CommandHandler.cs");
+
+string updateEntityCommandPath = Path.Combine(projectDir, $"{entity}Features", "Command", $"Update{entity}"  , $"Update{entity}Command.cs");
+string updateEntityCommandHandlerPath = Path.Combine(projectDir, $"{entity}Features", "Command", $"Update{entity}", $"Update{entity}CommandHandler.cs");
+
+string deleteEntityCommandPath = Path.Combine(projectDir, $"{entity}Features", "Command", $"Delete{entity}"  , $"Delete{entity}Command.cs");
+string deleteEntityCommandHandlerPath = Path.Combine(projectDir, $"{entity}Features", "Command", $"Delete{entity}", $"Delete{entity}CommandHandler.cs");
+
+Directory.CreateDirectory(Path.GetDirectoryName(getEntityByIdQueryPath));
+Directory.CreateDirectory(Path.GetDirectoryName(getEntityByIdQueryHandlerPath));
+
+Directory.CreateDirectory(Path.GetDirectoryName(getAllEntitiesQueryPath));
+Directory.CreateDirectory(Path.GetDirectoryName(getAllEntitiesQueryHandlerPath));
+
+Directory.CreateDirectory(Path.GetDirectoryName(createEntityCommandPath));
+Directory.CreateDirectory(Path.GetDirectoryName(createEntityCommandHandlerPath));
+
+Directory.CreateDirectory(Path.GetDirectoryName(updateEntityCommandPath));
+Directory.CreateDirectory(Path.GetDirectoryName(updateEntityCommandHandlerPath));
+
+Directory.CreateDirectory(Path.GetDirectoryName(deleteEntityCommandPath));
+Directory.CreateDirectory(Path.GetDirectoryName(deleteEntityCommandHandlerPath));
+
+// Dosya var mý kontrol et ve yoksa oluþtur
+if (!File.Exists(getEntityByIdQueryPath))
+{
+    File.WriteAllText(getEntityByIdQueryPath, getEntityByIdQueryContent);
+}
+if (!File.Exists(getEntityByIdQueryHandlerPath))
+{
+    File.WriteAllText(getEntityByIdQueryHandlerPath, getEntityByIdQueryHandlerContent);
+}
+
+if (!File.Exists(getAllEntitiesQueryPath))
+{
+    File.WriteAllText(getAllEntitiesQueryPath, getAllEntitiesQueryContent);
+}
+if (!File.Exists(getAllEntitiesQueryHandlerPath))
+{
+    File.WriteAllText(getAllEntitiesQueryHandlerPath, getAllEntitiesQueryHandlerContent);
+}
+
+if (!File.Exists(createEntityCommandPath))
+{
+    File.WriteAllText(createEntityCommandPath, createEntityCommandContent);
+}
+if (!File.Exists(createEntityCommandHandlerPath))
+{
+    File.WriteAllText(createEntityCommandHandlerPath, createEntityCommandHandlerContent);
+}
+
+if (!File.Exists(updateEntityCommandPath))
+{
+    File.WriteAllText(updateEntityCommandPath, updateEntityCommandContent);
+}
+if (!File.Exists(updateEntityCommandHandlerPath))
+{
+    File.WriteAllText(updateEntityCommandHandlerPath, updateEntityCommandHandlerContent);
+}
+
+if (!File.Exists(deleteEntityCommandPath))
+{
+    File.WriteAllText(deleteEntityCommandPath, deleteEntityCommandContent);
+}
+if (!File.Exists(deleteEntityCommandHandlerPath))
+{
+    File.WriteAllText(deleteEntityCommandHandlerPath, deleteEntityCommandHandlerContent);
+}
+
+#>

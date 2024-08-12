@@ -1,0 +1,101 @@
+<#@ template language="C#" debug="true" hostspecific="true" #>
+<#@ output extension=".txt" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="EnvDTE" #>
+<#@ import namespace="Microsoft.VisualStudio.TextTemplating" #>
+
+<# string entity = "Order"; #>
+
+<#
+string controllerName = $"{entity}Controller";
+string projectDir = Path.GetDirectoryName(Host.TemplateFile);
+string controllerPath = Path.Combine(projectDir, "Controllers", $"{controllerName}.cs");
+
+// Controller içeriði
+string controllerContent = $@"
+using CommerceHub.Bussiness.Auth.CreateAuthorizationToken;
+using CommerceHub.Bussiness.{entity}Features.Command;
+using CommerceHub.Bussiness.{entity}Features.Command.Create{entity};
+using CommerceHub.Bussiness.{entity}Features.Command.Delete{entity};
+using CommerceHub.Bussiness.{entity}Features.Command.Update{entity};
+using CommerceHub.Bussiness.{entity}Features.Query;
+using CommerceHub.Bussiness.{entity}Features.Query.GetAll{entity}s;
+using CommerceHub.Bussiness.{entity}Features.Query.Get{entity}ById;
+using CommerceHub.Schema;
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
+
+namespace CommerceHub.API.Controllers
+{{
+    [Route(""api/[controller]"")]
+    [ApiController]
+    public class {entity}Controller : ControllerBase
+    {{
+        private readonly IMediator _mediator;
+
+        public {entity}Controller(IMediator mediator)
+        {{
+            _mediator = mediator;
+        }}
+
+        [HttpGet(""{{id}}"")]
+        [Authorize]
+        public async Task<IActionResult> Get(int id)
+        {{
+            var operation = new Get{entity}ByIdQuery(id);
+            var result = await _mediator.Send(operation);
+            return Ok(result);
+        }}
+
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> Get()
+        {{
+            var operation = new GetAll{entity}sQuery();
+            var result = await _mediator.Send(operation);
+            return Ok(result);
+        }}
+
+        [HttpPost]
+        [Authorize(Policy = ""Admin"")]
+        public async Task<IActionResult> Post([FromBody] {entity}Request value)
+        {{
+            var operation = new Create{entity}Command(value);
+            var result = await _mediator.Send(operation);
+            return CreatedAtAction(nameof(Get), new {{ id = result.Data }}, result);
+        }}
+
+        [HttpPut(""{{id}}"")]
+        [Authorize(Policy = ""Admin"")]
+        public async Task<IActionResult> Put(int id, [FromBody] {entity}Request value)
+        {{
+            var operation = new Update{entity}Command(id, value);
+            var result = await _mediator.Send(operation);
+            return Ok(result);
+        }}
+
+        [HttpDelete(""{{id}}"")]
+        [Authorize(Policy = ""Admin"")]
+        public async Task<IActionResult> Delete(int id)
+        {{
+            var operation = new Delete{entity}Command(id);
+            var result = await _mediator.Send(operation);
+            return Ok(result);
+        }}
+    }}
+}}
+";
+
+// Klasörlerin varlýðýný kontrol et ve gerekirse yarat
+Directory.CreateDirectory(Path.GetDirectoryName(controllerPath));
+
+// Dosya var mý kontrol et ve yoksa oluþtur
+if (!File.Exists(controllerPath))
+{
+    File.WriteAllText(controllerPath, controllerContent);
+}
+#>
