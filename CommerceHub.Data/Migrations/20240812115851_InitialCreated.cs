@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CommerceHub.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class _01211211 : Migration
+    public partial class InitialCreated : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -134,6 +134,7 @@ namespace CommerceHub.Data.Migrations
                     CouponAmount = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
                     UsedPoints = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
                     EarnedPoints = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
+                    CouponCode = table.Column<string>(type: "text", nullable: true),
                     CouponId = table.Column<int>(type: "integer", nullable: true),
                     UserId = table.Column<int>(type: "integer", nullable: false),
                     InsertDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),

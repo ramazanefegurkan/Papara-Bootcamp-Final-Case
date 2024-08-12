@@ -21,7 +21,7 @@ namespace CommerceHub.Data.Repositories.ReportRepository
         {
             var sql = @"
             SELECT ""Id"",""Name"",""StockQuantity"",""CriticalStockLevel""
-            FROM public.""Products""
+            FROM  ""Products""
             WHERE ""StockQuantity"" <= ""CriticalStockLevel""";
            
             return await _dapperRepository.QueryAsync<CriticalStockLevelResponse>(sql);
@@ -37,13 +37,13 @@ namespace CommerceHub.Data.Repositories.ReportRepository
                 SUM(o.""CouponAmount"") as CouponAmount,
                 SUM(o.""UsedPoints"") as UsedPoints
             FROM 
-                ""Orders"" o
+                ""Order"" o
             WHERE 
-                o.""CreatedDate"" BETWEEN @Start AND @End";
+                o.""InsertDate"" BETWEEN @StartDate AND @EndDate";
 
-            var parameters = new { Start = start, End = end };
+            var parameters = new { StartDate = start, EndDate = end };
 
-            return await _dapperRepository.QueryAsync<PaymentReportResponse>(sql);
+            return await _dapperRepository.QueryAsync<PaymentReportResponse>(sql,parameters);
         }
 
         public async Task<IEnumerable<BestSellingProductReportResponse>> GetBestSellingProducts(DateTime start, DateTime end, int topN)
@@ -55,20 +55,20 @@ namespace CommerceHub.Data.Repositories.ReportRepository
                 SUM(od.""Quantity"") AS TotalQuantitySold,
                 SUM(od.""Quantity"" * od.""Price"") AS TotalRevenue
             FROM 
-                ""OrderDetails"" od
+                ""OrderDetail"" od
             INNER JOIN 
-                ""Orders"" o ON od.""OrderId"" = o.""Id""
+                ""Order"" o ON od.""OrderId"" = o.""Id""
             WHERE 
-                o.""CreatedDate"" BETWEEN @Start AND @End
+                o.""InsertDate"" BETWEEN @StartDate AND @EndDate
             GROUP BY 
-                od.""ProductId"", od.""Name""
+                od.""ProductId"", od.""ProductName""
             ORDER BY 
                 TotalQuantitySold DESC
             LIMIT @TopN";
 
-            var parameters = new { Start = start, End = end, TopN = topN };
+            var parameters = new { StartDate = start, EndDate = end, TopN = topN };
 
-            return await _dapperRepository.QueryAsync<BestSellingProductReportResponse>(query);
+            return await _dapperRepository.QueryAsync<BestSellingProductReportResponse>(query,parameters);
         }
     }
 }

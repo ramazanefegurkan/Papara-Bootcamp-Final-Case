@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace CommerceHub.Bussiness.UserFeatures.Command.UpdateUser
 {
-    internal class UpdateUserValidator : AbstractValidator<UpdateUserCommand>
+    public class UpdateUserValidator : AbstractValidator<UpdateUserCommand>
     {
         public UpdateUserValidator()
         {

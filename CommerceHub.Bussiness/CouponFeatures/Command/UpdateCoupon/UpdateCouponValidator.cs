@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace CommerceHub.Bussiness.CouponFeatures.Command.UpdateCoupon
 {
-    internal class UpdateCouponValidator : AbstractValidator<UpdateCouponCommand>
+    public class UpdateCouponValidator : AbstractValidator<UpdateCouponCommand>
     {
         public UpdateCouponValidator()
         {

@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CommerceHub.Data.Migrations
 {
     [DbContext(typeof(CommerceHubDbContext))]
-    [Migration("20240808183730_01211211")]
-    partial class _01211211
+    [Migration("20240812115851_InitialCreated")]
+    partial class InitialCreated
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -119,6 +119,9 @@ namespace CommerceHub.Data.Migrations
 
                     b.Property<decimal>("CouponAmount")
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("CouponCode")
+                        .HasColumnType("text");
 
                     b.Property<int?>("CouponId")
                         .HasColumnType("integer");

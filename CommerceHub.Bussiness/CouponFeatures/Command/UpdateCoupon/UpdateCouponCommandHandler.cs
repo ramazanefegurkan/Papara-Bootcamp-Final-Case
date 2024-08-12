@@ -32,8 +32,6 @@ namespace CommerceHub.Bussiness.CouponFeatures.Command.UpdateCoupon
                 throw new NotFoundException("Coupon not found");
             }
 
-            //TO:DO Kupon kullanýlmýþsa exception throw et
-
             _mapper.Map(command.Request, coupon);
             
             _unitOfWork.CouponRepository.Update(coupon);

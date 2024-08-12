@@ -117,6 +117,9 @@ namespace CommerceHub.Data.Migrations
                     b.Property<decimal>("CouponAmount")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<string>("CouponCode")
+                        .HasColumnType("text");
+
                     b.Property<int?>("CouponId")
                         .HasColumnType("integer");
 
