@@ -19,7 +19,7 @@ This repository contains the final project for the Papara Bootcamp. The project 
 
 ## Technologies
 
-- **.NET Core 7.0** - Main framework of the project
+- **.NET Core 8.0** - Main framework of the project
 - **Entity Framework Core** - ORM for database access
 - **RabbitMQ** - Message broker for notifications
 - **Redis** - In-memory data store for caching
@@ -58,7 +58,7 @@ This layer defines the models used for requests and responses in the API. Reques
 
 ### Requirements
 
-- .NET Core 7.0 SDK
+- .NET Core 8.0 SDK
 - PostgreSQL
 - RabbitMQ
 - Redis
