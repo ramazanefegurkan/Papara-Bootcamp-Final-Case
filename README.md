@@ -116,6 +116,11 @@ The API is documented using Swagger. Once the application is running, you can ac
 https://localhost:7276/swagger/index.html
 ```
 
+Alternatively, you can import the provided Postman collection in the repository to test the API endpoints using Postman.
+```
+https://documenter.getpostman.com/view/34773448/2sA3s4kVct
+```
+
 ## Usage
 
 You can interact with the application directly via the API using Swagger or Postman, or you can integrate the modules into your own applications. The application supports user registration, order management, report generation, and notification sending.
