@@ -82,10 +82,6 @@ This layer defines the models used for requests and responses in the API. Reques
    "ConnectionStrings": {
      "DefaultConnection": "Host=localhost;Database=your_database;Username=your_username;Password=your_password"
    },
-   "RabbitMQ": {
-     "Host": "localhost",
-     "Port": 5672
-   },
    "Redis": {
      "Host": "localhost",
      "Port": 6379
