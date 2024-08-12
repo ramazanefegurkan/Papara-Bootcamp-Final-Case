@@ -30,7 +30,7 @@ This repository contains the final project for the Papara Bootcamp. The project 
 
 ## Architecture
 
-This project follows a modular monolithic architecture. The business logic layer implements the CQRS pattern. RabbitMQ is used for sending notifications, while Redis is utilized for caching purposes.
+This project follows a monolithic architecture. The business logic layer implements the CQRS pattern. RabbitMQ is used for sending notifications, while Redis is utilized for caching purposes.
 
 ## Project Structure
 
