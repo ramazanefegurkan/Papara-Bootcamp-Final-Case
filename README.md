@@ -80,12 +80,9 @@ This layer defines the models used for requests and responses in the API. Reques
 3. Configure the PostgreSQL connection string, RabbitMQ, and Redis settings in the `appsettings.json` file:
    ```json
    "ConnectionStrings": {
-     "DefaultConnection": "Host=localhost;Database=your_database;Username=your_username;Password=your_password"
+     "DefaultConnection": "Host=localhost;Database=your_database;Username=your_username;Password=your_password",
+     "Redis": "localhost:6379"
    },
-   "Redis": {
-     "Host": "localhost",
-     "Port": 6379
-   }
    ```
 4. Configure RabbitMQ in Program.cs using MassTransit:
     builder.Services.AddMassTransit(x =>
