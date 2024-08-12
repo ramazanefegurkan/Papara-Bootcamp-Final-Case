@@ -87,8 +87,26 @@ This layer defines the models used for requests and responses in the API. Reques
      "Port": 6379
    }
    ```
-
-4. Run the application:
+4. Configure RabbitMQ in Program.cs using MassTransit:
+    builder.Services.AddMassTransit(x =>
+    {
+        x.AddConsumer<OrderPlacedConsumer>();
+    
+        x.UsingRabbitMq((context, cfg) =>
+        {
+            cfg.Host("rabbitmq://localhost", h =>
+            {
+                h.Username("guest");
+                h.Password("guest");
+            });
+    
+            cfg.ReceiveEndpoint("order-placed-queue", e =>
+            {
+                e.ConfigureConsumer<OrderPlacedConsumer>(context);
+            });
+        });
+    });
+5. Run the application:
    ```bash
    dotnet run
    ```
