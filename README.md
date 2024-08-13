@@ -107,6 +107,11 @@ This layer defines the models used for requests and responses in the API. Reques
    ```bash
    dotnet run
    ```
+6.Default Admin User
+```
+   username:test
+   password:test
+```
 
 ## API Documentation
 
